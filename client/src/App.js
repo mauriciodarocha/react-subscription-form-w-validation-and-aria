@@ -1,10 +1,13 @@
 import React from 'react';
 import { useForm } from "react-hook-form";
+import toast, { Toaster } from 'react-hot-toast';
 import arrow from './text-expand-arrow.svg';
 import './App.css';
 
 function App() {
   const { register, handleSubmit, formState: { errors }, reset, getValues, setError, clearErrors } = useForm();
+  const notifySuccess = (msg) => toast.success(msg);
+  const notifyError = (msg) => toast.error(msg);
   const getErrorMsgs = () => {
     const fields = ['firstname', 'lastname', 'email', 'organization', 'resident', 'email_type'];
     const msgs = []
@@ -21,7 +24,7 @@ function App() {
   }
   const validateCheckbox = () => {
     const fields = ['advances', 'alert', 'other_communications']
-    const values = getValues()
+    const values = getValues();
     const msgStr = "Select one type of email to receive";
     if (fields.filter((key) => values[key]).length > 0) {
       clearErrors('email_type')
@@ -34,7 +37,6 @@ function App() {
     reset()
   }
   const OnSubmit = (data) => {
-    validateCheckbox()
     if(Object.keys(errors).length) {return;}
     fetch('http://localhost:3001/api/save', {
       method: 'POST',
@@ -45,35 +47,40 @@ function App() {
     })
       .then(response => response.json())
       .then(data => {
-        console.log('Success:', data);
+        notifySuccess(data.message);
+        resetForm();
       })
       .catch((error) => {
-        console.error('Error:', error);
+        notifyError(data.message);
+        resetForm();
       });
   }
   return (
     <div className='form-container' >
-      <h2>Sign up for email updates</h2>
+      <h2 aria-label='Sign up for email updates form'>Sign up for email updates</h2>
       <p className='required-field'>* Indicates Required Field</p>
         <form id='form-registration' onSubmit={handleSubmit(OnSubmit)} 
                       onChange={validateCheckbox}>
-          <div className='error-msg error'>{getErrorMsgs()}</div>
+          <div className='error-msg error' aria-label='Form errors messages'>{getErrorMsgs()}</div>
           <fieldset>
             <div className='field-ctn field-text'>
               <label htmlFor='firstname'>First Name*</label>
               <input type='text' name='firstname' id='firstname' 
+                aria-label='Fill out with your first name'
                 {...register('firstname', { required: 'First name is required' })}
                 aria-invalid={errors && errors.firstname ? "true" : "false"} />
             </div>
             <div className='field-ctn field-text'>
               <label htmlFor='lastname'>Last Name*</label>
               <input type='text' name='lastname' id='lastname' 
-               {...register('lastname', { required: 'Last name is required' })}
-               aria-invalid={errors && errors.lastname ? "true" : "false"} />
+                aria-label='Fill out with your last name'
+                {...register('lastname', { required: 'Last name is required' })}
+                aria-invalid={errors && errors.lastname ? "true" : "false"} />
             </div>
             <div className='field-ctn field-text'>
               <label htmlFor='email'>Email*</label>
               <input type='email' name='email' id='email'
+                aria-label='Fill out with your email address'
                 {...register('email',
                   {
                     required: 'Email is required',
@@ -87,7 +94,8 @@ function App() {
             </div>
             <div className='field-ctn field-text'>
               <label htmlFor='organization'>Organization*</label>
-              <input type='text' name='organization' id='organization' 
+              <input type='text' name='organization' id='organization'
+                aria-label='Fill out with your organization name' 
                 {...register('organization', { required: 'Organization is required' })} 
                 aria-invalid={errors && errors.organization ? "true" : "false"}/>
             </div>
@@ -95,22 +103,29 @@ function App() {
               <label htmlFor='resident'>EU resident*</label>
                 <div>
                   <select name='resident' id='resident'
+                    aria-label="Press Y or N to select yes or no for EU resident"
                     style={{backgroundImage: `url(${arrow})`}}
                     {...register('resident', { required: 'EU resident is required' })}
-                    aria-invalid={errors.resident ? "true" : "false"}>
+                    aria-invalid={errors && errors.resident ? "true" : "false"}>
                     <option value=''>Select one</option>
-                    <option value='yes'>Yes</option>
-                    <option value='no'>No</option>
+                    <option value='Yes'>Yes</option>
+                    <option value='No'>No</option>
                   </select>
                 </div>
               </div>
               <hr />
-              <div className={`form-checkboxes ${errors && errors.email_type && 'checkbox-invalid'}`}>
-                <div className={`${errors && errors.email_type ? 'at-least-one-error' : 'hidden'}`}>Select at least one</div>
+              <div className={`form-checkboxes ${errors && errors.email_type ? 'checkboxes-invalid' : ''}`} aria-invalid={errors && errors.email_type ? "true" : "false"}>
+                {errors && errors.email_type &&
+                  <div className='at-least-one-error'>
+                    Select at least one
+                  </div>
+                }
                 <div className='field-ctn field-checkbox'>
                   <label htmlFor='advances'>Advances<span>*</span>
-                    <input type='checkbox' name='advances' id='advances' 
+                    <input type='checkbox' name='advances' id='advances'
+                      aria-label='Tick this box to receive email advances' 
                       {...register('advances')}
+                      onClick={validateCheckbox}
                       />
                     <span className="checkmark"></span>
                   </label>
@@ -118,7 +133,9 @@ function App() {
                 <div className='field-ctn field-checkbox'>
                   <label htmlFor='alert'>Alert<span>*</span>
                     <input type='checkbox' name='alert' id='alert' 
+                      aria-label='Tick this box to receive email alerts' 
                       {...register('alert')}
+                      onClick={validateCheckbox}
                       />
                     <span className="checkmark"></span>
                   </label>
@@ -126,7 +143,9 @@ function App() {
                 <div className='field-ctn field-checkbox'>
                 <label htmlFor='other-communications'>Other communications<span>*</span>
                   <input type='checkbox' name='other-communications' id='other-communications' 
-                    {...register('other_communications')}
+                      aria-label='Tick this box to receive general emails'
+                      {...register('other_communications')}
+                    onClick={validateCheckbox}
                     />
                   <span className="checkmark"></span>
                 </label>
@@ -134,11 +153,20 @@ function App() {
               </div>
               <hr />
             <div className='form-buttons'>
-              <button className='btn primary' type='submit'>Submit</button>
-              <button className='btn secondary' type='button' onClick={resetForm}>Reset</button>
+              <button className='btn primary' type='submit'
+                aria-label={getErrorMsgs().length ? 'You still have required fields to fill out. ' + getErrorMsgs() : 'Press this button to forward your information'}
+                >
+                Submit
+              </button>
+              <button className='btn secondary' type='button' onClick={resetForm}
+                aria-label='Press this button to reset this form'
+              >
+                Reset
+              </button>
             </div>
           </fieldset>
         </form>
+        <Toaster />
     </div>
   );
 }
