@@ -2,6 +2,7 @@
   --color-success: hsl(154, 59%, 51%);
   --color-alert: hsl(0, 100%, 74%);
   --color-field-border: #d4d7d6;
+  --color-fields: #ffffff;
   --color-accent: hsl(248, 32%, 49%);
   --color-secondary: #ffffff;
   --color-grayishblue: hsl(246, 25%, 77%);
@@ -53,6 +54,7 @@ select {
   text-overflow: '';
   padding-left: 4px;
   cursor: pointer;
+  background-color: var(--color-fields);
   background-repeat: no-repeat;
   background-position: 113px center;
 }
@@ -148,6 +150,20 @@ button {
 }
 .field-ctn {
   flex-basis: calc(50% - 20px);
+}
+.at-least-one-error {
+  display: flex;
+  font-size: 0.563em;
+  color: var(--color-alert);
+  width: 100%;
+  padding: 0 0 8px 20px;
+  font-style: italic;;
+}
+.checkbox-invalid label span {
+  color: var(--color-alert);
+}
+.hidden {
+  display: none;
 }
 @media only screen and (min-width: 375px) {
   fieldset {

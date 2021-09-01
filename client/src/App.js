@@ -4,9 +4,9 @@ import arrow from './text-expand-arrow.svg';
 import './App.css';
 
 function App() {
-  const { register, handleSubmit, formState: { errors }, reset } = useForm();
+  const { register, handleSubmit, formState: { errors }, reset, getValues, setError, clearErrors } = useForm();
   const getErrorMsgs = () => {
-    const fields = ['firstname', 'lastname', 'email', 'organization', 'resident'];
+    const fields = ['firstname', 'lastname', 'email', 'organization', 'resident', 'email_type'];
     const msgs = []
     fields.forEach((field) => {
       if (errors && errors[field]) {
@@ -19,18 +19,33 @@ function App() {
     }
     return msgStr
   }
+  const validateCheckbox = () => {
+    const fields = ['advances', 'alert', 'other_communications']
+    const values = getValues()
+    const msgStr = "Select one type of email to receive";
+    if (fields.filter((key) => values[key]).length > 0) {
+      clearErrors('email_type')
+      return
+    }
+    setError('email_type', { type: 'manual', message: msgStr })
+  }
   const resetForm = () => {
     document.getElementById('form-registration').reset()
     reset()
   }
   const OnSubmit = (data) => {
+    validateCheckbox()
+    if(Object.keys(errors).length) {return;}
     fetch('http://localhost:3001/api/save', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data),
-      })
+      method: 'POST',
+      // mode: 'cors',
+      // credentials: 'include',
+      headers: {
+        'Origin': 'http://localhost:3000',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    })
       .then(response => response.json())
       .then(data => {
         console.log('Success:', data);
@@ -43,7 +58,8 @@ function App() {
     <div className='form-container' >
       <h2>Sign up for email updates</h2>
       <p className='required-field'>* Indicates Required Field</p>
-        <form id='form-registration' onSubmit={handleSubmit(OnSubmit)}>
+        <form id='form-registration' onSubmit={handleSubmit(OnSubmit)} 
+                      onChange={validateCheckbox}>
           <div className='error-msg error'>{getErrorMsgs()}</div>
           <fieldset>
             <div className='field-ctn field-text'>
@@ -92,25 +108,29 @@ function App() {
                 </div>
               </div>
               <hr />
-              <div className='form-checkboxes'>
-              <div className='field-ctn field-checkbox'>
-                <label htmlFor='advances'>Advances
-                  <input type='checkbox' name='advances' id='advances' 
-                    {...register('advances')} />
-                  <span className="checkmark"></span>
-                </label>
-              </div>
-              <div className='field-ctn field-checkbox'>
-                <label htmlFor='alert'>Alert
-                  <input type='checkbox' name='alert' id='alert' 
-                    {...register('alert')} />
-                  <span className="checkmark"></span>
-                </label>
-              </div>
-              <div className='field-ctn field-checkbox'>
-                <label htmlFor='other-communications'>Other communications
+              <div className={`form-checkboxes ${errors && errors.email_type && 'checkbox-invalid'}`}>
+                <div className={`${errors && errors.email_type ? 'at-least-one-error' : 'hidden'}`}>Select at least one</div>
+                <div className='field-ctn field-checkbox'>
+                  <label htmlFor='advances'>Advances<span>*</span>
+                    <input type='checkbox' name='advances' id='advances' 
+                      {...register('advances')}
+                      />
+                    <span className="checkmark"></span>
+                  </label>
+                </div>
+                <div className='field-ctn field-checkbox'>
+                  <label htmlFor='alert'>Alert<span>*</span>
+                    <input type='checkbox' name='alert' id='alert' 
+                      {...register('alert')}
+                      />
+                    <span className="checkmark"></span>
+                  </label>
+                </div>
+                <div className='field-ctn field-checkbox'>
+                <label htmlFor='other-communications'>Other communications<span>*</span>
                   <input type='checkbox' name='other-communications' id='other-communications' 
-                    {...register('other_communications')} />
+                    {...register('other_communications')}
+                    />
                   <span className="checkmark"></span>
                 </label>
               </div>
