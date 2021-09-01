@@ -1,5 +1,6 @@
 import React from 'react';
 import { useForm } from "react-hook-form";
+import arrow from './text-expand-arrow.svg';
 import './App.css';
 
 function App() {
@@ -79,13 +80,16 @@ function App() {
             </div>
             <div className='field-ctn'>
               <label htmlFor='resident'>EU resident*</label>
-              <select name='resident' id='resident'
-                {...register('resident', { required: 'EU resident is required' })}
-                aria-invalid={errors.resident ? "true" : "false"}>
-                <option value=''>Select one</option>
-                <option value='yes'>Yes</option>
-                <option value='no'>No</option>
-              </select>
+                <div>
+                  <select name='resident' id='resident'
+                    style={{backgroundImage: `url(${arrow})`}}
+                    {...register('resident', { required: 'EU resident is required' })}
+                    aria-invalid={errors.resident ? "true" : "false"}>
+                    <option value=''>Select one</option>
+                    <option value='yes'>Yes</option>
+                    <option value='no'>No</option>
+                  </select>
+                </div>
               </div>
               <hr />
               <div className='form-checkboxes'>
