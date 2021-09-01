@@ -1,9 +1,11 @@
 var express = require('express');
-var session = require('express-session')
+var session = require('express-session');
+var cors = require('cors');
 var app = express();
-app.use(session({ secret: 'qwertyusdfghj', resave: true }))
+app.use(cors())
+app.use(session({ secret: 'qwertyusdfghj', resave: true }));
 var router = express.Router();
-app.use(router)
+app.use(router);
 
 /* GET home page. */
 app.post('/api/save', (req, res, next) => {
