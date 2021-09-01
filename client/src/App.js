@@ -38,10 +38,7 @@ function App() {
     if(Object.keys(errors).length) {return;}
     fetch('http://localhost:3001/api/save', {
       method: 'POST',
-      // mode: 'cors',
-      // credentials: 'include',
       headers: {
-        'Origin': 'http://localhost:3000',
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
