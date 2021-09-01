@@ -38,7 +38,7 @@ function App() {
   }
   const OnSubmit = (data) => {
     if(Object.keys(errors).length) {return;}
-    fetch('http://localhost:3001/api/save', {
+    fetch('/api/save', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -47,12 +47,15 @@ function App() {
     })
       .then(response => response.json())
       .then(data => {
-        notifySuccess(data.message);
-        resetForm();
+        if (data.status !== 'error') {
+          notifySuccess(data.message);
+          resetForm();
+        } else {
+          notifyError(data.message);
+        }
       })
       .catch((error) => {
         notifyError(data.message);
-        resetForm();
       });
   }
   return (
