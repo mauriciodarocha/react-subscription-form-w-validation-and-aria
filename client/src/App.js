@@ -5,7 +5,7 @@ import arrow from './text-expand-arrow.svg';
 import './App.css';
 
 function App() {
-  const { register, handleSubmit, formState: { errors }, reset, getValues, setError, clearErrors } = useForm();
+  const { register, handleSubmit, formState: { errors }, reset, getValues, setError, clearErrors } = useForm({reValidateMode: 'onChange'});
   const notifySuccess = (msg) => toast.success(msg);
   const notifyError = (msg) => toast.error(msg);
   const getErrorMsgs = () => {
