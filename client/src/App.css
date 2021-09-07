@@ -165,7 +165,7 @@ button {
 .hidden {
   display: none;
 }
-@media only screen and (min-width: 375px) {
+@media only screen and (min-width: 376px) {
   fieldset {
     display: flex;
   }  
