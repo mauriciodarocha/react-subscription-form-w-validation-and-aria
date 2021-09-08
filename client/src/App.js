@@ -3,9 +3,10 @@ import { useForm } from "react-hook-form";
 import toast, { Toaster } from 'react-hot-toast';
 import arrow from './text-expand-arrow.svg';
 import './App.css';
+import Dropdown from './components/Dropdown';
 
-function App() {
-  const { register, handleSubmit, formState: { errors }, reset, getValues, setError, clearErrors } = useForm({reValidateMode: 'onChange'});
+const App = () => {
+  const { register, handleSubmit, formState: { errors }, reset, getValues, setError, clearErrors, setValue } = useForm({reValidateMode: 'onChange'});
   const notifySuccess = (msg) => toast.success(msg);
   const notifyError = (msg) => toast.error(msg);
   const getErrorMsgs = () => {
@@ -35,6 +36,13 @@ function App() {
   const resetForm = () => {
     document.getElementById('form-registration').reset()
     reset()
+  }
+  const handleOnSelected = (e) => {
+    if(e.name) {
+      setValue(e.name, e.value || "")
+      if(!e.value) setError(e.name, { type: 'manual', message: e.required || "Error: "+e.name })
+      else clearErrors(e.name)
+    }
   }
   const OnSubmit = (data) => {
     if(Object.keys(errors).length) {return;}
@@ -103,18 +111,20 @@ function App() {
                 aria-invalid={errors && errors.organization ? "true" : "false"}/>
             </div>
             <div className='field-ctn'>
-              <label htmlFor='resident'>EU resident*</label>
-                <div>
-                  <select name='resident' id='resident'
-                    aria-label="Press Y or N to select yes or no for EU resident"
-                    style={{backgroundImage: `url(${arrow})`}}
-                    {...register('resident', { required: 'EU resident is required' })}
-                    aria-invalid={errors && errors.resident ? "true" : "false"}>
-                    <option value=''>Select one</option>
-                    <option value='Yes'>Yes</option>
-                    <option value='No'>No</option>
-                  </select>
-                </div>
+              <label htmlFor='resident'>EU resident*</label> 
+              <Dropdown name='resident' id='resident'
+                className='dropdown' firstoption='Select one'
+                style={{backgroundImage: `url(${arrow})`}}
+                {...register('resident', { required: 'EU resident is required' })}
+                required='EU resident is required'
+                label="Press Y or N to select yes or no for EU resident"
+                invalid={errors && errors.resident ? "true" : "false"}
+                onSelected={(e) => handleOnSelected(e)}
+                >
+                  <option>Select one</option>
+                  <option value='Yes'>Yes</option>
+                  <option value='No'>No</option>
+              </Dropdown>
               </div>
               <hr />
               <div className={`form-checkboxes ${errors && errors.email_type ? 'checkboxes-invalid' : ''}`} aria-invalid={errors && errors.email_type ? "true" : "false"}>
