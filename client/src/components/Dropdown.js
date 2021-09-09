@@ -1,14 +1,15 @@
 import React from 'react';
 import './Dropdown.css'
 const initialState = { value: '', text: '' }
-const Dropdown = React.forwardRef(({children, label, name, invalid, onSelected, required}, ref) => {
+const Dropdown = React.forwardRef(({children, label, name, error, onSelected, message, ...inputProps}, ref) => {
     const wrapperRef = React.useRef();
     const [selection, setSelection] = React.useState({ initialState, ...{value: children[0].props.value || "", text: children[0].props.children }})
+    const [ariaLabel, setAriaLabel] = React.useState(label + ' ' + children[0].props.children)
     React.useEffect(() => {
         DropdownEvents()
     })
     const onDropdownSelectedItem = (selectedItem) => {
-        if (onSelected && 'function' === typeof onSelected) {onSelected({...selectedItem, ...{name, required}})}
+        if (onSelected && 'function' === typeof onSelected) {onSelected({...selectedItem, ...{name, message}})}
     }
     const DropdownEvents = () => {
         const Dropdown = document.getElementById("DropdownComponent");
@@ -16,16 +17,21 @@ const Dropdown = React.forwardRef(({children, label, name, invalid, onSelected, 
         Dropdown.setAttribute('started', true);
 
         const DropdownBtn = document.getElementById("DropdownBtn");
+        const DropdownList = document.getElementById("DropdownList");
         const DroptdownOpts0 = document.querySelector(".dropdown-lst .dd-item:first-child > *:not([selected])")
         const DropdownOpts = document.querySelectorAll(".dropdown-lst .dd-item > *");
-        const DropdownArrowBtn = document.querySelector(".Dropdown .dropdown-input-ctn");
+        const DropdownArrowBtn = document.querySelector(".Dropdown .dropdown-control-ctn");
         const DropdownOpenClose = (e) => {
-            if (e.type==='click' || (e.key && !/ArrowDown|ArrowUp|Tab|Enter/.test(e.key))) {
-                e.stopPropagation();
+            e.stopPropagation();
+            if ((e.type==='click' && e.pointerId>0 )|| (e.key && !/ArrowDown|ArrowUp|Tab/.test(e.key))) {
                 if (!/open/.test(Dropdown.classList.value)) {
                     Dropdown.classList.add('open')
+                    DropdownBtn.setAttribute('aria-expanded', true)
+                    document.getElementById('DropdownList').focus();
                 } else {
-                    Dropdown.classList.remove('open')
+                    DropdownBtn.removeAttribute('aria-expanded')
+                    DropdownBtn.focus()
+                    Dropdown.classList.remove('open')                    
                 }
             }
             if (e.key && /ArrowDown|ArrowUp/.test(e.key)) {
@@ -34,28 +40,35 @@ const Dropdown = React.forwardRef(({children, label, name, invalid, onSelected, 
                 let move = /ArrowDown/.test(e.key) ? current+=1 : /ArrowUp/.test(e.key) ? current-=1 : current;
                 if (move>DropdownOpts.length-1) {move = DropdownOpts.length-1}
                 if (move<0) {move = 0}
-                DropdownOpts.forEach(e => e.removeAttribute('selected'));
+                DropdownOpts.forEach(e => {e.removeAttribute('selected'); e.removeAttribute('aria-selected')});
                 DropdownOpts[move].setAttribute('selected', true);
+                DropdownOpts[move].setAttribute('aria-selected', true);
                 const selectedItem = { value: DropdownOpts[move].getAttribute('value') || "", text: DropdownOpts[move].innerText };
-                setSelection(selectedItem)
-                onDropdownSelectedItem(selectedItem)
+                setSelection(selectedItem);
+                setAriaLabel(label + ' ' + DropdownOpts[move].innerText)
+                onDropdownSelectedItem(selectedItem);
             }
-            if ((/keydown|keyup/.test(e.type) && !e.key) || (e.key && /Tab|Enter/.test(e.key))) {
-                Dropdown.classList.remove('open')
+            if (/blur/.test(e.type)) {
+                Dropdown.classList.remove('open');
             }
         }
         if(DroptdownOpts0) { DroptdownOpts0.setAttribute('selected', true); }
-        DropdownArrowBtn.addEventListener('click', DropdownOpenClose)
-        DropdownBtn.addEventListener('click', DropdownOpenClose)
-        DropdownBtn.addEventListener('keyup', DropdownOpenClose, true)
+        DropdownArrowBtn.addEventListener('click', DropdownOpenClose);
+        DropdownList.addEventListener('keyup', DropdownOpenClose, true);
+        DropdownList.addEventListener('blur', DropdownOpenClose, true);
+        DropdownBtn.addEventListener('keyup', DropdownOpenClose, true);
         DropdownOpts.forEach((i) => {
             i.addEventListener('click', ({target}) => {
                 const selectedItem = { value: target.getAttribute('value') || "", text: target.innerText }
                 setSelection(selectedItem)
-                DropdownOpts.forEach(e => e.removeAttribute('selected'))
+                setAriaLabel(label + ' ' + target.innerText)
+                DropdownOpts.forEach(e => {e.removeAttribute('selected'); e.removeAttribute('aria-selected')});
                 target.setAttribute('selected',true)
+                target.setAttribute('aria-selected',true)
                 Dropdown.classList.remove('open')
                 onDropdownSelectedItem(selectedItem)
+                DropdownBtn.removeAttribute('aria-expanded')
+                DropdownBtn.focus()
             })
         })
 
@@ -63,26 +76,24 @@ const Dropdown = React.forwardRef(({children, label, name, invalid, onSelected, 
     }
     return (
         <div className="Dropdown" id="DropdownComponent" ref={wrapperRef}>
-            <div className="dropdown-input-ctn">
-                <input
-                    type='hidden'
+            <div className="dropdown-control-ctn">
+                <input type='hidden' id='dropdown-input' aria-label={ariaLabel} />
+                <button
                     ref={ref}
                     name={name}
-                    value={selection.value}
-                    />
-                <button
                     id='DropdownBtn' type='button'
-                    className={'dropdown-selector-btn ' + (!selection.value && invalid==='true' ? 'invalid' : '')}
-                    aria-label={label}
+                    className={'dropdown-selector-btn ' + (!selection.value && error==='true' ? 'invalid' : '')}
+                    aria-haspopup='listbox'
+                    aria-labelledby='dropdown-input'
                     >
                     {selection.text}
                 </button>
             </div>
             <div className="dropdown-lst-ctn">
-                <ul className="dropdown-lst" role="listbox" id='dd-lst'>
+                <ul className="dropdown-lst" id='DropdownList' role="listbox" tabIndex='-1' aria-labelledby='dropdown-input' aria-activedescendant=''>
                     {children && children.length > 0 &&
                         children.map((child, index) => {
-                            return <li key={'key-'+index} id={'dd-item-'+index} className={'dd-item dd-item-'+index}>{child}</li>
+                            return <li key={'key-'+index} id={'dropdown-item-'+index} className={'dd-item dd-item-'+index}>{child}</li>
                         })
                     }
                 </ul>

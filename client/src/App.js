@@ -40,7 +40,7 @@ const App = () => {
   const handleOnSelected = (e) => {
     if(e.name) {
       setValue(e.name, e.value || "")
-      if(!e.value) setError(e.name, { type: 'manual', message: e.required || "Error: "+e.name })
+      if(!e.value) setError(e.name, { type: 'manual', message: e.message || "Error: "+e.name })
       else clearErrors(e.name)
     }
   }
@@ -116,14 +116,14 @@ const App = () => {
                 className='dropdown' firstoption='Select one'
                 style={{backgroundImage: `url(${arrow})`}}
                 {...register('resident', { required: 'EU resident is required' })}
-                required='EU resident is required'
-                label="Press Y or N to select yes or no for EU resident"
-                invalid={errors && errors.resident ? "true" : "false"}
+                message='EU resident is required'
+                label="EU resident"
+                error={errors && errors.resident ? "true" : "false"}
                 onSelected={(e) => handleOnSelected(e)}
                 >
-                  <option>Select one</option>
-                  <option value='Yes'>Yes</option>
-                  <option value='No'>No</option>
+                  <option id="select-one">Select one</option>
+                  <option id="yes" value='Yes'>Yes</option>
+                  <option id="no" value='No'>No</option>
               </Dropdown>
               </div>
               <hr />

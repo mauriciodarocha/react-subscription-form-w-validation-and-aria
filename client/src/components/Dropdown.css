@@ -16,10 +16,10 @@
     background-color: #fff;
     box-shadow: 2px 1px 4px 1px rgba(0,0,0,0.4);
 }
-.Dropdown .dropdown-input-ctn {
+.Dropdown .dropdown-control-ctn {
     position: relative;
 }
-.Dropdown .dropdown-input-ctn::after {
+.Dropdown .dropdown-control-ctn::after {
     content: "";
     display: block;
     background: transparent url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAUAAAAJCAYAAAD6reaeAAAACXBIWXMAAA7DAAAOwwHHb6hkAAAAGXRFWHRTb2Z0d2FyZQB3d3cuaW5rc2NhcGUub3Jnm+48GgAAAIZJREFUCJllzLENQjEMBNAzYSC7hoohkPhdnAVYg5YBko4C8VegoKBAQvYCCKS/B6b5qbjy3emSqj6Y+eXub8xZRMSeiE45503H5O4TM9+J6CwiTzP7UG9LKauIGAHsUkczm0TkC+Dwt4yIIQGAqq4BjBExtNauNMOlAwAsARyJaFtrvfWrH9kqPP7Mp9YLAAAAAElFTkSuQmCC) center center no-repeat;
@@ -29,7 +29,7 @@
     right: 9px;
     top: 8px;
 }
-.Dropdown.open .dropdown-input-ctn::after {
+.Dropdown.open .dropdown-control-ctn::after {
     transform: rotate(90deg);
 }
 .Dropdown ul {
